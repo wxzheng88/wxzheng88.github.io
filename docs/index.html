@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>天气预报</title>
+  <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1-crypto-js.js"></script>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(to right, #00c6ff, #0072ff);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    #weather-widget {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px; /* 可根据需要调整 */
+      box-sizing: border-box; /* 确保内边距不会影响总宽度 */
+    }
+    #weather-container {
+      background-color: rgba(255, 255, 255, 0.9);
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      width: 400px;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    #weather-container:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+    }
+    h1 {
+      font-size: 32px;
+      margin-bottom: 15px;
+      color: #0072ff;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+    }
+    p {
+      font-size: 20px;
+      color: #333;
+      margin: 5px 0;
+    }
+    .temperature {
+      font-size: 48px;
+      font-weight: bold;
+      color: #ff5722;
+      margin: 10px 0;
+    }
+    #weather-icon {
+      width: 100px;
+      height: 100px;
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="weather-widget">
+    <div id="weather-container">
+      <h1>实时天气预报</h1>
+      <p id="location"></p>
+      <p id="weather"></p>
+      <p id="temperature" class="temperature"></p>
+    </div>
+  </div>
+
+  <script>
+    // 默认查询无锡的天气
+    var API_URL = "https://api.seniverse.com/v3/weather/now.json?key=S_um-cZp--O0KCHmf&location=wuxi&language=zh-Hans&unit=c";
+
+    // 发送请求获取天气数据
+    $.getJSON(API_URL, function(data) {
+      var weather = data.results[0];
+      document.getElementById('location').innerText = "地点: " + weather.location.path;
+      document.getElementById('weather').innerText = "天气: " + weather.now.text;
+      document.getElementById('temperature').innerText = weather.now.temperature + "°C";
+    }).fail(function() {
+      document.getElementById('weather-container').innerText = "无法获取天气信息";
+    });
+  </script>
+
+  <iframe src="path/to/weather-widget.html" 
+          style="border: none; width: 400px; height: 400px; overflow: hidden;">
+  </iframe>
+</body>
+</html>
