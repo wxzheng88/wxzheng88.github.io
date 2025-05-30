@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>Ink 博客主题 - 静态演示</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- ...（样式同前）... -->
+</head>
+<body>
+  <!-- ...（头部、侧边栏、底部同前）... -->
+  <div class="container">
+    <main>
+      <div class="post-list">
+        <!-- 文章列表将由 JS 动态渲染 -->
+      </div>
+    </main>
+    <!-- ...（aside同前）... -->
+  </div>
+  <!-- ...（友情链接、footer同前）... -->
+  <script>
+    // 动态渲染文章列表
+    window.onload = function() {
+      const postList = document.querySelector('.post-list');
+      if (!postList) return;
+      const posts = JSON.parse(localStorage.getItem('blog_posts') || '[]');
+      if (posts.length === 0) {
+        postList.innerHTML = `
+          <div class="post">
+            <a class="post-title" href="#">Ink主题V0.5.2发布！</a>
+            <div class="post-meta">
+              <span>作者: <b>Flac</b></span>
+              <span>2024-05-01</span>
+              <span>阅读: 1234</span>
+              <span>评论: 8</span>
+              <span class="post-tags">
+                <a class="post-tag" href="#">发布</a>
+                <a class="post-tag" href="#">更新</a>
+              </span>
+            </div>
+            <p class="post-summary">这是一款暗黑简约风格的现代化主题，让你专注于图文创作或内容分享。Ink基本博客布局已完成，目前可满足博客等站点的基本使用！</p>
+          </div>
+          <!-- ...可继续添加默认文章... -->
+        `;
+        return;
+      }
+      postList.innerHTML = '';
+      posts.forEach(p => {
+        const div = document.createElement('div');
+        div.className = 'post';
+        div.innerHTML = `
+          <a class="post-title" href="#">${p.title}</a>
+          <div class="post-meta">
+            <span>作者: <b>Flac</b></span>
+            <span>${p.date || ''}</span>
+            <span>阅读: 0</span>
+            <span>评论: 0</span>
+            <span class="post-tags"></span>
+          </div>
+          <p class="post-summary">${p.content.length > 100 ? p.content.slice(0,100)+'...' : p.content}</p>
+        `;
+        postList.appendChild(div);
+      });
+    };
+  </script>
+</body>
+</html>
