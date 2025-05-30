@@ -1,93 +1,384 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
+  <title>Ink 博客主题 - 静态演示</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>天气预报</title>
-  <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1-crypto-js.js"></script>
   <style>
+    :root {
+      --bg: #181818;
+      --panel: #232323;
+      --text: #eee;
+      --accent: #4f8cff;
+      --border: #333;
+      --card-radius: 12px;
+      --shadow: 0 4px 24px #0002;
+    }
     body {
-      font-family: 'Arial', sans-serif;
       margin: 0;
-      padding: 0;
-      background: linear-gradient(to right, #00c6ff, #0072ff);
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      min-height: 100vh;
       display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
+      flex-direction: column;
     }
-    #weather-widget {
+    header {
+      background: var(--panel);
+      padding: 1.5rem 2rem 0.5rem 2rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .nav {
       display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 20px; /* 可根据需要调整 */
-      box-sizing: border-box; /* 确保内边距不会影响总宽度 */
+      gap: 2rem;
+      justify-content: flex-end;
+      margin-bottom: 0.5rem;
     }
-    #weather-container {
-      background-color: rgba(255, 255, 255, 0.9);
-      padding: 40px;
-      border-radius: 15px;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+    .nav a {
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav a:hover {
+      color: var(--accent);
+    }
+    .banner {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      padding: 1.5rem 0 1.2rem 0;
+    }
+    .banner-avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      border: 2px solid var(--accent);
+      object-fit: cover;
+      background: #222;
+    }
+    .banner-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+    .banner-title {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+    .banner-desc {
+      color: #bbb;
+      font-size: 1.1rem;
+    }
+    .search-bar {
+      margin: 2rem auto 1.5rem auto;
+      max-width: 500px;
+      display: flex;
+      align-items: center;
+      background: var(--panel);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      padding: 0.5rem 1rem;
+    }
+    .search-bar input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-size: 1rem;
+      outline: none;
+      padding: 0.5rem 0;
+    }
+    .container {
+      display: flex;
+      gap: 2rem;
+      max-width: 1100px;
+      margin: 0 auto;
+      width: 100%;
+      padding: 0 1rem 2rem 1rem;
+      flex: 1;
+    }
+    main {
+      flex: 2;
+      min-width: 0;
+    }
+    aside {
+      flex: 1;
+      min-width: 260px;
+      max-width: 320px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    .post-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    .post {
+      background: var(--panel);
+      border-radius: var(--card-radius);
+      padding: 1.5rem 1.2rem;
+      border: 1px solid var(--border);
+      transition: box-shadow 0.2s;
+      box-shadow: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+    }
+    .post:hover {
+      box-shadow: var(--shadow);
+    }
+    .post-title {
+      margin: 0 0 0.2rem 0;
+      font-size: 1.4rem;
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+    .post-title:hover {
+      color: #fff;
+    }
+    .post-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.2rem;
+      font-size: 0.98rem;
+      color: #aaa;
+      align-items: center;
+    }
+    .post-meta span {
+      display: flex;
+      align-items: center;
+      gap: 0.3em;
+    }
+    .post-tags {
+      display: flex;
+      gap: 0.5em;
+    }
+    .post-tag {
+      background: #222;
+      color: var(--accent);
+      border-radius: 4px;
+      padding: 0.1em 0.7em;
+      font-size: 0.92em;
+      text-decoration: none;
+    }
+    .post-summary {
+      margin: 0;
+      color: #bbb;
+      font-size: 1rem;
+    }
+    .info-card {
+      background: var(--panel);
+      border-radius: var(--card-radius);
+      border: 1px solid var(--border);
+      padding: 1.2rem 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.7rem;
+      box-shadow: none;
+    }
+    .info-avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      border: 2px solid var(--accent);
+      object-fit: cover;
+      background: #222;
+    }
+    .info-name {
+      font-size: 1.15rem;
+      font-weight: 600;
+    }
+    .info-desc {
+      color: #bbb;
+      font-size: 0.98rem;
       text-align: center;
-      width: 400px;
-      transition: transform 0.3s, box-shadow 0.3s;
     }
-    #weather-container:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+    .tag-cloud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5em;
+      margin-top: 0.5em;
     }
-    h1 {
-      font-size: 32px;
-      margin-bottom: 15px;
-      color: #0072ff;
-      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+    .tag-cloud a {
+      color: var(--accent);
+      background: #232b3b;
+      border-radius: 4px;
+      padding: 0.2em 0.8em;
+      font-size: 0.98em;
+      text-decoration: none;
+      transition: background 0.2s;
     }
-    p {
-      font-size: 20px;
-      color: #333;
-      margin: 5px 0;
+    .tag-cloud a:hover {
+      background: var(--accent);
+      color: #fff;
     }
-    .temperature {
-      font-size: 48px;
-      font-weight: bold;
-      color: #ff5722;
-      margin: 10px 0;
+    .links {
+      background: var(--panel);
+      border-radius: var(--card-radius);
+      border: 1px solid var(--border);
+      padding: 1.2rem 1rem;
+      margin: 2rem auto 0 auto;
+      max-width: 1100px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.2rem;
+      justify-content: center;
     }
-    #weather-icon {
-      width: 100px;
-      height: 100px;
-      margin: 20px 0;
+    .link-item {
+      color: var(--accent);
+      background: #232b3b;
+      border-radius: 4px;
+      padding: 0.3em 1.1em;
+      font-size: 1em;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .link-item:hover {
+      background: var(--accent);
+      color: #fff;
+    }
+    footer {
+      background: var(--panel);
+      color: #888;
+      text-align: center;
+      padding: 1.2rem 0 1.2rem 0;
+      border-top: 1px solid var(--border);
+      font-size: 0.95rem;
+      margin-top: 2rem;
+    }
+    @media (max-width: 900px) {
+      .container {
+        flex-direction: column;
+        gap: 0;
+      }
+      aside {
+        max-width: 100%;
+        margin-top: 2rem;
+      }
+    }
+    @media (max-width: 600px) {
+      header, .container {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+      }
+      .banner {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.7rem;
+      }
+      .search-bar {
+        max-width: 100%;
+      }
+      aside {
+        min-width: 0;
+      }
     }
   </style>
 </head>
 <body>
-  <div id="weather-widget">
-    <div id="weather-container">
-      <h1>实时天气预报</h1>
-      <p id="location"></p>
-      <p id="weather"></p>
-      <p id="temperature" class="temperature"></p>
+  <header>
+    <nav class="nav">
+      <a href="#">首页</a>
+      <a href="#">归档</a>
+      <a href="#">标签</a>
+      <a href="#">关于</a>
+    </nav>
+    <div class="banner">
+      <img class="banner-avatar" src="https://avatars.githubusercontent.com/u/9919?s=200&v=4" alt="avatar">
+      <div class="banner-info">
+        <div class="banner-title">Ink 博客主题</div>
+        <div class="banner-desc">专注于内容创作的极简暗黑风格博客主题，支持多种插件与自定义扩展。</div>
+      </div>
     </div>
+  </header>
+  <div class="search-bar">
+    <input type="text" placeholder="搜索文章..." disabled>
+    <span style="color:#666;font-size:1.1rem;margin-left:0.5rem;">🔍</span>
   </div>
-
-  <script>
-    // 默认查询无锡的天气
-    var API_URL = "https://api.seniverse.com/v3/weather/now.json?key=S_um-cZp--O0KCHmf&location=wuxi&language=zh-Hans&unit=c";
-
-    // 发送请求获取天气数据
-    $.getJSON(API_URL, function(data) {
-      var weather = data.results[0];
-      document.getElementById('location').innerText = "地点: " + weather.location.path;
-      document.getElementById('weather').innerText = "天气: " + weather.now.text;
-      document.getElementById('temperature').innerText = weather.now.temperature + "°C";
-    }).fail(function() {
-      document.getElementById('weather-container').innerText = "无法获取天气信息";
-    });
-  </script>
-
-  <iframe src="path/to/weather-widget.html" 
-          style="border: none; width: 400px; height: 400px; overflow: hidden;">
-  </iframe>
+  <div class="container">
+    <main>
+      <div class="post-list">
+        <div class="post">
+          <a class="post-title" href="#">Ink主题V0.5.2发布！</a>
+          <div class="post-meta">
+            <span>作者: <b>Flac</b></span>
+            <span>2024-05-01</span>
+            <span>阅读: 1234</span>
+            <span>评论: 8</span>
+            <span class="post-tags">
+              <a class="post-tag" href="#">发布</a>
+              <a class="post-tag" href="#">更新</a>
+            </span>
+          </div>
+          <p class="post-summary">这是一款暗黑简约风格的现代化主题，让你专注于图文创作或内容分享。Ink基本博客布局已完成，目前可满足博客等站点的基本使用！</p>
+        </div>
+        <div class="post">
+          <a class="post-title" href="#">主题特性介绍</a>
+          <div class="post-meta">
+            <span>作者: <b>Flac</b></span>
+            <span>2024-04-20</span>
+            <span>阅读: 888</span>
+            <span>评论: 3</span>
+            <span class="post-tags">
+              <a class="post-tag" href="#">特性</a>
+              <a class="post-tag" href="#">极简</a>
+            </span>
+          </div>
+          <p class="post-summary">暗黑主题、极简设计、站内搜索、评论系统等，助你打造专注内容的博客体验。</p>
+        </div>
+        <div class="post">
+          <a class="post-title" href="#">后续计划与TODO</a>
+          <div class="post-meta">
+            <span>作者: <b>Flac</b></span>
+            <span>2024-04-10</span>
+            <span>阅读: 666</span>
+            <span>评论: 1</span>
+            <span class="post-tags">
+              <a class="post-tag" href="#">计划</a>
+              <a class="post-tag" href="#">优化</a>
+            </span>
+          </div>
+          <p class="post-summary">细节优化、图库、瞬间等新功能即将上线，欢迎提出建议和反馈！</p>
+        </div>
+      </div>
+    </main>
+    <aside>
+      <div class="info-card">
+        <img class="info-avatar" src="https://avatars.githubusercontent.com/u/9919?s=200&v=4" alt="avatar">
+        <div class="info-name">Flac</div>
+        <div class="info-desc">热爱编程与设计，专注于极简与高效的内容创作体验。</div>
+      </div>
+      <div class="info-card">
+        <div style="font-weight:600;margin-bottom:0.5em;">标签云</div>
+        <div class="tag-cloud">
+          <a href="#">极简</a>
+          <a href="#">暗黑</a>
+          <a href="#">博客</a>
+          <a href="#">发布</a>
+          <a href="#">优化</a>
+          <a href="#">前端</a>
+          <a href="#">后端</a>
+          <a href="#">Vue</a>
+          <a href="#">Java</a>
+          <a href="#">设计</a>
+        </div>
+      </div>
+    </aside>
+  </div>
+  <div class="links">
+    <a class="link-item" href="https://halo.run/" target="_blank">Halo 官网</a>
+    <a class="link-item" href="https://github.com/w-flac/theme-ink" target="_blank">原主题仓库</a>
+    <a class="link-item" href="https://docs.halo.run/user-guide/themes" target="_blank">主题文档</a>
+    <a class="link-item" href="https://github.com/halo-dev/halo-theme-hshan" target="_blank">hshan 主题</a>
+  </div>
+  <footer>
+    © 2024 Ink 主题仿制版 | 仅供学习交流 | <a href="https://github.com/w-flac/theme-ink" style="color:#4f8cff;text-decoration:none;">原主题地址</a>
+  </footer>
 </body>
 </html>
