@@ -2,65 +2,296 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <title>Ink 博客主题 - 静态演示</title>
+  <title>Ink 博客后台管理</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- ...（样式同前）... -->
+  <style>
+    :root {
+      --bg: #181818;
+      --panel: #232323;
+      --text: #eee;
+      --accent: #4f8cff;
+      --border: #333;
+      --card-radius: 12px;
+      --shadow: 0 4px 24px #0002;
+    }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: var(--panel);
+      padding: 1.5rem 2rem 1rem 2rem;
+      border-bottom: 1px solid var(--border);
+      text-align: center;
+    }
+    .admin-title {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+    .container {
+      max-width: 700px;
+      margin: 2rem auto 0 auto;
+      background: var(--panel);
+      border-radius: var(--card-radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      padding: 2rem 1.5rem 2rem 1.5rem;
+    }
+    .form-group {
+      margin-bottom: 1.2rem;
+    }
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: #bbb;
+      font-size: 1rem;
+    }
+    input[type="text"], input[type="password"], textarea {
+      width: 100%;
+      padding: 0.6rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: #222;
+      color: var(--text);
+      font-size: 1rem;
+      margin-bottom: 0.2rem;
+      outline: none;
+      box-sizing: border-box;
+    }
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+    button {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 0.6rem 1.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-right: 0.7rem;
+      margin-top: 0.2rem;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #2566d6;
+    }
+    .post-list {
+      margin-top: 2rem;
+    }
+    .post-item {
+      background: #232323;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      margin-bottom: 1.2rem;
+      padding: 1rem 1rem 0.7rem 1rem;
+      box-shadow: none;
+      position: relative;
+    }
+    .post-title {
+      font-size: 1.2rem;
+      color: var(--accent);
+      font-weight: 600;
+      margin: 0 0 0.3rem 0;
+    }
+    .post-meta {
+      color: #aaa;
+      font-size: 0.95rem;
+      margin-bottom: 0.5rem;
+    }
+    .post-actions {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      display: flex;
+      gap: 0.5rem;
+    }
+    .msg {
+      color: #f66;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+    @media (max-width: 600px) {
+      .container {
+        padding: 1rem 0.3rem 1.5rem 0.3rem;
+      }
+    }
+  </style>
 </head>
 <body>
-  <!-- ...（头部、侧边栏、底部同前）... -->
-  <div class="container">
-    <main>
-      <div class="post-list">
-        <!-- 文章列表将由 JS 动态渲染 -->
+  <header>
+    <div class="admin-title">Ink 博客后台管理</div>
+  </header>
+  <div class="container" id="login-box">
+    <form id="login-form">
+      <div class="form-group">
+        <label for="username">用户名</label>
+        <input type="text" id="username" required autocomplete="username">
       </div>
-    </main>
-    <!-- ...（aside同前）... -->
+      <div class="form-group">
+        <label for="password">密码</label>
+        <input type="password" id="password" required autocomplete="current-password">
+      </div>
+      <button type="submit">登录</button>
+      <div class="msg" id="login-msg"></div>
+    </form>
   </div>
-  <!-- ...（友情链接、footer同前）... -->
+  <div class="container" id="admin-box" style="display:none;">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <div style="font-size:1.2rem;font-weight:600;">文章管理</div>
+      <button id="logout-btn" style="background:#444;">退出</button>
+    </div>
+    <form id="post-form" style="margin-top:1.5rem;">
+      <input type="hidden" id="post-id">
+      <div class="form-group">
+        <label for="post-title">标题</label>
+        <input type="text" id="post-title" required>
+      </div>
+      <div class="form-group">
+        <label for="post-content">内容</label>
+        <textarea id="post-content" required></textarea>
+      </div>
+      <button type="submit" id="save-btn">发布</button>
+      <button type="button" id="cancel-edit" style="display:none;background:#444;">取消编辑</button>
+      <div class="msg" id="post-msg"></div>
+    </form>
+    <div class="post-list" id="post-list"></div>
+  </div>
   <script>
-    // 动态渲染文章列表
-    window.onload = function() {
-      const postList = document.querySelector('.post-list');
-      if (!postList) return;
-      const posts = JSON.parse(localStorage.getItem('blog_posts') || '[]');
-      if (posts.length === 0) {
-        postList.innerHTML = `
-          <div class="post">
-            <a class="post-title" href="#">Ink主题V0.5.2发布！</a>
-            <div class="post-meta">
-              <span>作者: <b>Flac</b></span>
-              <span>2024-05-01</span>
-              <span>阅读: 1234</span>
-              <span>评论: 8</span>
-              <span class="post-tags">
-                <a class="post-tag" href="#">发布</a>
-                <a class="post-tag" href="#">更新</a>
-              </span>
-            </div>
-            <p class="post-summary">这是一款暗黑简约风格的现代化主题，让你专注于图文创作或内容分享。Ink基本博客布局已完成，目前可满足博客等站点的基本使用！</p>
-          </div>
-          <!-- ...可继续添加默认文章... -->
-        `;
-        return;
+    // 简单账号密码
+    const ADMIN_USER = 'admin';
+    const ADMIN_PASS = 'admin123';
+
+    // 登录逻辑
+    const loginBox = document.getElementById('login-box');
+    const adminBox = document.getElementById('admin-box');
+    const loginForm = document.getElementById('login-form');
+    const loginMsg = document.getElementById('login-msg');
+    const logoutBtn = document.getElementById('logout-btn');
+
+    function isLoggedIn() {
+      return localStorage.getItem('blog_admin_login') === '1';
+    }
+    function setLogin(val) {
+      localStorage.setItem('blog_admin_login', val ? '1' : '0');
+    }
+    function showAdmin() {
+      loginBox.style.display = 'none';
+      adminBox.style.display = '';
+      renderPosts();
+    }
+    function showLogin() {
+      loginBox.style.display = '';
+      adminBox.style.display = 'none';
+    }
+    if (isLoggedIn()) showAdmin();
+    else showLogin();
+
+    loginForm.onsubmit = function(e) {
+      e.preventDefault();
+      const user = document.getElementById('username').value.trim();
+      const pass = document.getElementById('password').value;
+      if (user === ADMIN_USER && pass === ADMIN_PASS) {
+        setLogin(true);
+        showAdmin();
+        loginMsg.textContent = '';
+      } else {
+        loginMsg.textContent = '用户名或密码错误';
       }
-      postList.innerHTML = '';
-      posts.forEach(p => {
+    };
+    logoutBtn.onclick = function() {
+      setLogin(false);
+      showLogin();
+    };
+
+    // 文章管理逻辑
+    const postForm = document.getElementById('post-form');
+    const postList = document.getElementById('post-list');
+    const postMsg = document.getElementById('post-msg');
+    const cancelEdit = document.getElementById('cancel-edit');
+    function getPosts() {
+      return JSON.parse(localStorage.getItem('blog_posts') || '[]');
+    }
+    function savePosts(posts) {
+      localStorage.setItem('blog_posts', JSON.stringify(posts));
+    }
+    function renderPosts() {
+      const posts = getPosts();
+      postList.innerHTML = posts.length ? '' : '<div style="color:#888;text-align:center;">暂无文章</div>';
+      posts.forEach((p, i) => {
         const div = document.createElement('div');
-        div.className = 'post';
+        div.className = 'post-item';
         div.innerHTML = `
-          <a class="post-title" href="#">${p.title}</a>
-          <div class="post-meta">
-            <span>作者: <b>Flac</b></span>
-            <span>${p.date || ''}</span>
-            <span>阅读: 0</span>
-            <span>评论: 0</span>
-            <span class="post-tags"></span>
+          <div class="post-title">${p.title}</div>
+          <div class="post-meta">${p.date || ''}</div>
+          <div style="color:#bbb;font-size:1rem;white-space:pre-line;">${p.content.length > 100 ? p.content.slice(0,100)+'...' : p.content}</div>
+          <div class="post-actions">
+            <button onclick="editPost(${i})" style="background:#2566d6;">编辑</button>
+            <button onclick="deletePost(${i})" style="background:#f66;">删除</button>
           </div>
-          <p class="post-summary">${p.content.length > 100 ? p.content.slice(0,100)+'...' : p.content}</p>
         `;
         postList.appendChild(div);
       });
+    }
+    window.editPost = function(idx) {
+      const posts = getPosts();
+      const p = posts[idx];
+      document.getElementById('post-id').value = idx;
+      document.getElementById('post-title').value = p.title;
+      document.getElementById('post-content').value = p.content;
+      document.getElementById('save-btn').textContent = '保存';
+      cancelEdit.style.display = '';
     };
+    window.deletePost = function(idx) {
+      if (!confirm('确定要删除这篇文章吗？')) return;
+      const posts = getPosts();
+      posts.splice(idx, 1);
+      savePosts(posts);
+      renderPosts();
+    };
+    cancelEdit.onclick = function() {
+      postForm.reset();
+      document.getElementById('post-id').value = '';
+      document.getElementById('save-btn').textContent = '发布';
+      cancelEdit.style.display = 'none';
+      postMsg.textContent = '';
+    };
+    postForm.onsubmit = function(e) {
+      e.preventDefault();
+      const id = document.getElementById('post-id').value;
+      const title = document.getElementById('post-title').value.trim();
+      const content = document.getElementById('post-content').value.trim();
+      if (!title || !content) {
+        postMsg.textContent = '标题和内容不能为空';
+        return;
+      }
+      let posts = getPosts();
+      const now = new Date();
+      const dateStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0') + ' ' + now.toLocaleTimeString();
+      if (id) {
+        posts[id] = { title, content, date: dateStr };
+        postMsg.textContent = '已保存';
+      } else {
+        posts.unshift({ title, content, date: dateStr });
+        postMsg.textContent = '已发布';
+      }
+      savePosts(posts);
+      renderPosts();
+      postForm.reset();
+      document.getElementById('post-id').value = '';
+      document.getElementById('save-btn').textContent = '发布';
+      cancelEdit.style.display = 'none';
+      setTimeout(()=>{ postMsg.textContent = ''; }, 1200);
+    };
+    // 初始渲染
+    if (isLoggedIn()) renderPosts();
   </script>
 </body>
 </html>
